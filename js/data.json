@@ -1,12 +1,7 @@
 {"data":[
  {
-   "name":"方大丝绸招聘信息提交页",
-    "details":"原生js提交招聘信息，信息提交后会alert弹出...",
-    "date":"2020/9/30",
-    "time":"19.10"
- },
- {
-   "name":"方大丝绸招聘信息提交页",
+   "url":"https://orangeyunczy.github.io/html/fangdasichou/index.html",
+   "title":"方大丝绸招聘信息提交页",
     "details":"原生js提交招聘信息，信息提交后会alert弹出...",
     "date":"2020/9/30",
     "time":"19.10"
