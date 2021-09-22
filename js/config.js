@@ -1,4 +1,4 @@
-var ip = "http://localhost:8080";
+var ip = "http://17438m795.51vip.biz";
 var config = {
     login: ip + "/login",
     warehouse: ip + "/warehouse",
