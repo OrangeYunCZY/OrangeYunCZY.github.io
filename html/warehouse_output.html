@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>维修部仓库管理系统</title>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <meta name="keywords" content="LightYear,LightYearAdmin,光年,后台模板,后台管理系统,光年HTML模板">
+    <meta name="description" content="Light Year Admin V4是一个后台管理系统的HTML模板，基于Bootstrap v4.4.1。">
+    <meta name="author" content="yinqi">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../css/style.min.css" rel="stylesheet">
+    <link href="../js/jquery-confirm/jquery-confirm.min.css" rel="stylesheet">
+    <script src="../js/config.js"></script>
+</head>
+
+<body>
+    <div style="margin-top: 50px;" class="container-fluid p-t-15">
+
+
+        <div class="row " style="margin: 0px auto;width: 100%; ">
+
+            <div class="col-lg-12 ">
+                <div class="card ">
+                    <header class="card-header ">
+                        <div class="card-body">
+                            <form>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <input id="date1" type="date" class="form-control" placeholder="查询日期">
+                                    </div>
+                                    <span style="line-height:40px;">到</span>
+                                    <div class="col">
+                                        <input id="date2" type="date" class="form-control" placeholder="查询日期">
+                                    </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-primary" id="button">查询</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </header>
+                    <div class="card-body ">
+                        <div class="table-responsive ">
+                            <table class="table table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th>取货批次</th>
+                                        <th>货物名称</th>
+                                        <th>型号</th>
+                                        <th>厂商</th>
+                                        <th>数量</th>
+                                        <th>单位</th>
+                                        <th>单位</th>
+                                        <th>合价</th>
+                                        <th>出货人</th>
+                                        <th>取货人</th>
+                                        <th>出库日期</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="warehouse_out">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript " src="../js/jquery.min.js "></script>
+    <script type="text/javascript " src="../js/popper.min.js "></script>
+    <script type="text/javascript " src="../js/bootstrap.min.js "></script>
+    <script type="text/javascript " src="../js/main.min.js "></script>
+    <script type="text/javascript" src="../js/jquery-confirm/jquery-confirm.min.js"></script>
+
+    <script>
+        window.onload = function() {
+
+            var date = new Date;
+            let date_one = new Date(date.getFullYear() + "/" + [date.getMonth() + 1] + "/" + "1");
+            $.post(config.output, {
+                    date_max: date_one.toLocaleDateString(),
+                    date_mix: date.toLocaleDateString()
+                },
+                function(data) {
+                    datatable(data);
+                }, "json");
+        }
+
+        function datatable(data) {
+            let table;
+            for (let i = 0; i < data.length; i++) {
+                data[i].date = data[i].date.substring(0, 10);
+                if (data[i].model == null || data[i].model == '') data[i].model = '--';
+                if (data[i].factory == null || data[i].factory == '') data[i].factory = '--';
+                table += '<tr><td>' + data[i].oid + '</td><td>' + data[i].wname + '</td><td>' + data[i].model + '</td><td>' + data[i].factory + '</td><td>' + data[i].i + '</td><td>' + data[i].unit + '</td><td>' + data[i].u_pice + '</td><td>' + (data[i].i * data[i].u_pice) + '</td><td>' + data[i].user_admin + '</td><td>' + data[i].user + '</td><td>' + data[i].date + '</td></tr>';
+            }
+            $("#warehouse_out").html(table);
+        }
+
+        $("#button").click(function() {
+            let date1 = $("#date1").val();
+            let date2 = $("#date2").val();
+            if (date1 == "" || date2 == "") {
+                $.alert({
+                    title: '未选择日期',
+                    content: '请将日期选择完整！',
+                    animation: 'scale',
+                    closeAnimation: 'bottom',
+                    backgroundDismiss: true,
+                    buttons: {
+                        okay: {
+                            text: '确认',
+                            btnClass: 'btn-blue',
+                            action: function() {}
+                        }
+                    }
+                });
+            } else {
+                date1 = new Date(date1);
+                date2 = new Date(date2);
+                $.post(config.output, {
+                        date_max: date1.toLocaleDateString(),
+                        date_mix: date2.toLocaleDateString()
+                    },
+                    function(data) {
+                        console.log(data);
+                        if (data.state == "400") {
+                            console.log(data);
+                            $.alert({
+                                title: '未查询到记录',
+                                content: '查询记录为空！',
+                                animation: 'scale',
+                                closeAnimation: 'bottom',
+                                backgroundDismiss: true,
+                                buttons: {
+                                    okay: {
+                                        text: '确认',
+                                        btnClass: 'btn-blue',
+                                        action: function() {}
+                                    }
+                                }
+                            });
+                        } else {
+                            datatable(data);
+                        }
+                    }, "json");
+            }
+        });
+    </script>
+</body>
+
+</html>

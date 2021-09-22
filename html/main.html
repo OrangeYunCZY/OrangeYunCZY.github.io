@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>维修部仓库管理系统</title>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <meta name="author" content="yinqi">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../css/style.min.css" rel="stylesheet">
+    <script src="../js/config.js"></script>
+</head>
+
+<body>
+    <div style="margin-top: 50px;" class="container-fluid p-t-15">
+
+        <div class="row">
+            <div class="row" style="margin-left: 0px;margin-right: 0px;width: 100%;">
+                <div class="col-md-6 col-xl-3">
+                    <div class=" card bg-primary text-white ">
+                        <div class="card-body clearfix ">
+                            <div class="flex-box ">
+                                <span class="img-avatar img-avatar-48 bg-translucent "><i class="mdi mdi-chart-pie fs-22 "></i></span>
+                                <span class="fs-22 lh-22 " id="head_1"></span>
+                            </div>
+                            <div class="text-right ">仓库货品</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3 ">
+                    <div class="card bg-success text-white ">
+                        <div class="card-body clearfix ">
+                            <div class="flex-box ">
+                                <span class="img-avatar img-avatar-48 bg-translucent "><i class="mdi mdi-home fs-22 "></i></span>
+                                <span class="fs-22 lh-22 " id="head_2"></span>
+                            </div>
+                            <div class="text-right ">仓库存量</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3 ">
+                    <div class="card bg-info text-white ">
+                        <div class="card-body clearfix ">
+                            <div class="flex-box ">
+                                <span class="img-avatar img-avatar-48 bg-translucent "><i class="mdi mdi-account fs-22 "></i></span>
+                                <span class="fs-22 lh-22 " id="head_3"></span>
+                            </div>
+                            <div class="text-right ">仓库人员</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3 ">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body clearfix ">
+                            <div class="flex-box ">
+                                <span class="img-avatar img-avatar-48 bg-translucent "><i class="mdi mdi-currency-cny fs-22 "></i></span>
+                                <span class="fs-22 lh-22 " id="head_4"></span>
+                            </div>
+                            <div class="text-right ">仓库金额</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row " style="margin-left: 0px;margin-right: 0px;width: 50%; ">
+
+                <div class="col-lg-12 ">
+                    <div class="card ">
+                        <header class="card-header ">
+                            <div class="card-title ">仓库库存</div>
+                        </header>
+                        <div class="card-body ">
+                            <div class="table-responsive ">
+                                <table class="table table-hover ">
+                                    <thead>
+                                        <tr>
+                                            <th>货号</th>
+                                            <th>货物名称</th>
+                                            <th>型号</th>
+                                            <th>厂商</th>
+                                            <th>数量</th>
+                                            <th>单位</th>
+                                            <th>位置</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="datatable_warehouse"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="row " style="margin-left: 0px;margin-right: 0px;width: 50%; ">
+
+                <div class="col-lg-12 ">
+                    <div class="card ">
+                        <header class="card-header ">
+                            <div class="card-title">库存报警</div>
+                        </header>
+                        <div class="card-body ">
+                            <div class="table-responsive ">
+                                <table class="table table-hover ">
+                                    <thead>
+                                        <tr>
+                                            <th>货号</th>
+                                            <th>货物名称</th>
+                                            <th>型号</th>
+                                            <th>厂商</th>
+                                            <th>现存数量</th>
+                                            <th>单位</th>
+                                            <th>预计数量</th>
+                                            <th>位置</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="datatable_output"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <script type="text/javascript " src="../js/jquery.min.js "></script>
+        <script type="text/javascript " src="../js/popper.min.js "></script>
+        <script type="text/javascript " src="../js/bootstrap.min.js "></script>
+        <script type="text/javascript " src="../js/main.min.js "></script>
+        <script type="text/javascript " src="../js/Chart.min.js "></script>
+        <script>
+            window.onload = function() {
+
+                $.post(config.warehouse,
+                    function(data) {
+                        datatable_warehouse(data);
+                    }, "json");
+
+                $.post(config.ew,
+                    function(data) {
+                        ew(data);
+                    }, "json");
+
+            }
+
+            function datatable_warehouse(data) {
+                let table;
+                let s = 0;
+                let m = 0;
+                for (let i = 0; i < data.length; i++) {
+                    s += data[i].i;
+                    m += data[i].i * data[i].u_pice;
+                    if (data[i].model == null || data[i].model == '') data[i].model = '--';
+                    if (data[i].factory == null || data[i].factory == '') data[i].factory = '--';
+                    table += '<tr><td>' + data[i].wid + '</td><td>' + data[i].wname + '</td><td>' + data[i].model + '</td><td>' + data[i].factory + '</td><td>' + data[i].i + '</td><td>' + data[i].unit + '</td><td>' + data[i].xy + '</td></tr>';
+                }
+                $("#datatable_warehouse").html(table);
+                $("#head_1").html(data.length);
+                $("#head_2").html(s);
+                $("#head_4").html(m);
+                $.post(config.user,
+                    function(data) {
+                        $("#head_3").html(data.length);
+                    }, "json");
+            }
+
+            function ew(data) {
+                let table;
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].model == null || data[i].model == '') data[i].model = '--';
+                    if (data[i].factory == null || data[i].factory == '') data[i].factory = '--';
+                    table += '<tr><td>' + data[i].wid + '</td><td>' + data[i].wname + '</td><td>' + data[i].model + '</td><td>' + data[i].factory + '</td><td>' + data[i].i + '</td><td>' + data[i].unit + '</td><td>' + data[i].ew + '</td><td>' + data[i].xy + '</td></tr>';
+                }
+                $("#datatable_output").html(table);
+            }
+        </script>
+</body>
+
+</html>

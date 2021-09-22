@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>维修部仓库管理系统</title>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <meta name="author" content="yinqi">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../css/style.min.css" rel="stylesheet">
+    <link href="../js/jquery-confirm/jquery-confirm.min.css" rel="stylesheet">
+    <script src="../js/config.js"></script>
+</head>
+
+<body>
+    <div style="margin-top: 50px;" class="container-fluid p-t-15">
+
+
+        <div class="row " style="margin: 0px auto;width: 100%; ">
+
+            <div class="col-lg-12 ">
+                <div class="card ">
+                    <table>
+
+                        <tr>
+                            <th>配置货物名称：</th>
+                            <th>型号</th>
+                            <th>厂商</th>
+                            <th>设置货物单位：</th>
+                            <th>设置货物单价：</th>
+                            <th>库存报警数量：</th>
+                            <th>货物摆放位置：</th>
+                        </tr>
+                        <tr>
+                            <td><input id="name" type="text" autocomplete="off" class="form-control"></td>
+                            <td><input id="model" type="text" autocomplete="off" class="form-control"></td>
+                            <td><input id="factory" type="text" autocomplete="off" class="form-control"></td>
+                            <td><input id="unit" type="text" autocomplete="off" class="form-control"></td>
+                            <td><input id="u_pice" type="number" min="0" autocomplete="off" class="form-control"></td>
+                            <td><input id="ew" type="number" value="0" autocomplete="off" min="0" style="width: 100%;" placeholder="0"></td>
+                            <td><input id="xy" type="text" autocomplete="off" class="form-control"></td>
+                        </tr>
+                    </table>
+                    <button id="button" class="btn btn-primary">提交</button>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="row " style="margin: 0px auto;width: 100%; ">
+
+            <div class="col-lg-12 ">
+                <div class="card ">
+                    <header class="card-header ">
+
+                    </header>
+                    <div class="card-body ">
+                        <div class="table-responsive ">
+                            <table class="table table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th>货号</th>
+                                        <th>货物名称</th>
+                                        <th>型号</th>
+                                        <th>厂商</th>
+                                        <th>数量</th>
+                                        <th>单位</th>
+                                        <th>库存预警</th>
+                                        <th>位置</th>
+                                        <th>编辑</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript " src="../js/jquery.min.js "></script>
+    <script type="text/javascript " src="../js/popper.min.js "></script>
+    <script type="text/javascript " src="../js/bootstrap.min.js "></script>
+    <script type="text/javascript " src="../js/main.min.js "></script>
+    <script type="text/javascript" src="../js/jquery-confirm/jquery-confirm.min.js"></script>
+
+    <script>
+        window.onload = function() {
+            $.post(config.warehouse, {},
+                function(data) {
+                    datatable(data);
+                }, "json");
+        }
+
+        function datatable(data) {
+            let text = "";
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].model == null || data[i].model == '') data[i].model = '--';
+                if (data[i].factory == null || data[i].factory == '') data[i].factory = '--';
+                text += "<tr><td>" + data[i].wid + "</td><td>" + data[i].wname + "</td><td>" + data[i].model + "</td><td>" + data[i].factory + "</td><td>" + data[i].i + "</td><td>" + data[i].unit + "</td><td>" + data[i].ew + "</td><td>" + data[i].xy + "</td><td><button class='btn btn-warning' onclick='edit(" + data[i].wid + ")'>编辑</button> <button class='btn btn-danger' onclick='del(" + data[i].wid + ")'>删除</button></td></tr>";
+            }
+            $("#table").html(text);
+        }
+
+        function edit(wid) {
+            $.confirm({
+                title: '货号：' + wid + ' 的更改',
+                //content: 'url:form.html',  // 也可以采用url形式
+                content: '<div class="form-group p-1 mb-0">' +
+                    '  <label class="control-label">重新设置库存预警：</label>' +
+                    '  <input id="ew" type="number" placeholder="0" min="0" class="form-control">' +
+                    '</div>' +
+                    '<div class="form-group p-1 mb-0">' +
+                    '  <label class="control-label">物品摆放位置：</label>' +
+                    '  <input id="xy" autocomplete="off" type="text"  placeholder="输入更改后的位置..." class="form-control">' +
+                    '</div>',
+                buttons: {
+                    sayMyName: {
+                        text: '更改设置',
+                        btnClass: 'btn-orange',
+                        action: function() {
+                            let ew = this.$content.find('input#ew').val();
+                            let xy = this.$content.find('input#xy').val();
+                            if (xy == '') {
+                                $.alert({
+                                    title: "输入错误",
+                                    content: "摆放位置不能为空！",
+                                    type: 'red'
+                                });
+                                return false;
+                            } else {
+                                $.post(config.editclass, {
+                                        wid: wid,
+                                        ew: ew,
+                                        xy: xy
+                                    },
+                                    function(data) {
+                                        location.reload();
+                                    }, "json");
+                            }
+                        }
+                    },
+                    '取消': function() {}
+                }
+            });
+        }
+
+        function del(wid) {
+            $.alert({
+                title: '确定删除吗',
+                content: '删除后库存也直接清零！',
+                animation: 'scale',
+                closeAnimation: 'bottom',
+                backgroundDismiss: true,
+                buttons: {
+                    okay: {
+                        text: '确认',
+                        btnClass: 'btn-blue',
+                        action: function() {
+                            $.post(config.delclass, {
+                                    wid: wid
+                                },
+                                function(data) {
+                                    location.reload();
+                                }, "json");
+                        }
+                    }
+                }
+            });
+        }
+
+
+        $("#button").click(function() {
+            let u_pice = $("#u_pice").val();
+            let model = $("#model").val();
+            if (model == '') model == null;
+            let factory = $("#factory").val();
+            if (factory == '') factory == null;
+            let name = $("#name").val();
+            let unit = $("#unit").val();
+            let ew = $("#ew").val();
+            let xy = $("#xy").val();
+            if (name == '' || unit == '' || xy == '' || u_pice == '') {
+                $.alert({
+                    title: '输入错误',
+                    content: '请将信息填写完整！',
+                    animation: 'scale',
+                    closeAnimation: 'bottom',
+                    backgroundDismiss: true,
+                    buttons: {
+                        okay: {
+                            text: '确认',
+                            btnClass: 'btn-blue',
+                            action: function() {}
+                        }
+                    }
+                });
+            } else {
+                $.post(config.addclass, {
+                        name: name,
+                        model: model,
+                        factory: factory,
+                        u_pice: u_pice,
+                        unit: unit,
+                        ew: ew,
+                        xy: xy
+                    },
+                    function(data) {
+                        location.reload();
+                    }, "json");
+            }
+        });
+    </script>
+</body>
+
+</html>

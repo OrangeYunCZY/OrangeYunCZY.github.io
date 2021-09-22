@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>维修部仓库管理系统</title>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <meta name="author" content="yinqi">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../css/style.min.css" rel="stylesheet">
+    <link href="../js/jquery-confirm/jquery-confirm.min.css" rel="stylesheet">
+    <script src="../js/config.js"></script>
+</head>
+
+<body>
+    <div style="margin-top: 50px;" class="container-fluid p-t-15">
+
+
+        <div class="row " style="margin: 0px auto;width: 100%; ">
+
+            <div class="col-lg-12 ">
+                <div class="card ">
+                    <header class="card-header ">
+                        <div class="card-body">
+                            <div class="form-row">
+
+                                <div class="col">
+                                    <input autocomplete="off" type="text" class="form-control" placeholder="货物名称" id="text">
+                                </div>
+                                <div class="col">
+                                    <button type="button" class="btn btn-primary" id="button">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="card-body ">
+                        <div class="table-responsive ">
+                            <table class="table table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th>货号</th>
+                                        <th>货物名称</th>
+                                        <th>型号</th>
+                                        <th>厂商</th>
+                                        <th>数量</th>
+                                        <th>单位</th>
+                                        <th>单价</th>
+                                        <th>合价</th>
+                                        <th>库存预警</th>
+                                        <th>存放位置</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="warehouse_main">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript " src="../js/jquery.min.js "></script>
+    <script type="text/javascript " src="../js/popper.min.js "></script>
+    <script type="text/javascript " src="../js/bootstrap.min.js "></script>
+    <script type="text/javascript " src="../js/main.min.js "></script>
+    <script type="text/javascript" src="../js/jquery-confirm/jquery-confirm.min.js"></script>
+    <script>
+        window.onload = function() {
+
+            $.post(config.warehouse,
+                function(data) {
+                    datatable(data);
+                }, "json");
+        }
+
+        function datatable(data) {
+            if (data.state == 400) {
+                $.alert({
+                    title: '查询错误',
+                    content: '查询不到所搜字段的商品！',
+                    animation: 'scale',
+                    closeAnimation: 'bottom',
+                    backgroundDismiss: true,
+                    buttons: {
+                        okay: {
+                            text: '确认',
+                            btnClass: 'btn-blue',
+                            action: function() {}
+                        }
+                    }
+                });
+                $("#text").val("");
+            }
+            let table;
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].model == null || data[i].model == '') data[i].model = '--';
+                if (data[i].factory == null || data[i].factory == '') data[i].factory = '--';
+                table += '<tr><td>' + data[i].wid + '</td><td>' + data[i].wname + '</td><td>' + data[i].model + '</td><td>' + data[i].factory + '</td><td>' + data[i].i + '</td><td>' + data[i].unit + '</td><td>' + data[i].u_pice + '</td><td>' + (data[i].i * data[i].u_pice) + '</td><td>' + data[i].ew + '</td><td>' + data[i].xy + '</td><td><button class="btn btn-info" onclick="out(' + data[i].wid + ')">出库</button> <button class="btn btn-success" onclick="inp(' + data[i].wid + ')">入库</button></td></tr>';
+            }
+            $("#warehouse_main").html(table);
+        }
+
+        function out(wid) {
+            let wname;
+            let model;
+            let factory;
+            let i;
+            let unit;
+            let u_pice;
+            let user_admin;
+            let user;
+            let date = new Date();
+            let text = "";
+            let text_admin = "";
+            let wdata;
+            $.ajaxSettings.async = false;
+            $.post(config.user,
+                function(data) {
+                    let textt = "";
+                    for (let i = 0; i < data.length; i++) {
+                        textt += "<option>" + data[i].name + "</option>";
+                        if (data[i].identity == 'admin') text_admin += "<option>" + data[i].name + "</option>";
+                    }
+                    text = textt;
+                    console.log(data);
+                }, "json");
+            $.post(config.warehouse_wid, {
+                    wid: wid
+                },
+                function(data) {
+                    wdata = data;
+                    wname = data.wname;
+                    model = data.model;
+                    factory = data.factory;
+                    unit = data.unit;
+                    u_pice = data.u_pice;
+                }, "json");
+            if (wdata.model == null || wdata.model == '') wdata.model = '--';
+            if (wdata.factory == null || wdata.factory == '') wdata.factory = '--';
+            $.confirm({
+                title: '货号：' + wid + ' 的更改',
+                boxWidth: '700px',
+                useBootstrap: false,
+                //content: 'url:form.html',  // 也可以采用url形式
+                content: '<table style="width:100%">' +
+                    '<thead><tr><th>名称</th><th>型号</th><th>厂商</th><th>库存</th><th>单位</th><th>出库数量</th><th>出库人</th><th>领料人</th></tr></thead>' +
+                    '<tbody><tr><td>' + wdata.wname + '</td><td>' + wdata.model + '</td><td>' + wdata.factory + '</td><td>' + wdata.i + '</td><td>' + wdata.unit + '</td><td>' +
+                    '<input id="out_i" type="number" placeholder="0" min="0" style="width:70px" class="form-control">' +
+                    '</td>' +
+                    '<td><select class="form-control selectpicker"  id="user_admin"><option>选择出库人...</option>' +
+                    text_admin +
+                    '</select></td>' +
+                    '<td><select class="form-control selectpicker"  id="user"><option>选择领料人...</option>' +
+                    text +
+                    '</select></td>' +
+                    '</tr></tbody>' +
+                    '</table>',
+                buttons: {
+                    sayMyName: {
+                        text: '确定出库',
+                        btnClass: 'btn-orange',
+                        action: function() {
+                            i = $("#out_i").val();
+                            user = $("#user").find("option:selected").text();
+                            user_admin = $("#user_admin").find("option:selected").text();
+                            if (user == "选择出库人") {
+                                $.alert({
+                                    title: "输入错误",
+                                    content: "请选择取货人！",
+                                    type: 'red'
+                                });
+                                return false;
+                            } else if (user_admin == "选择领料人...") {
+                                $.alert({
+                                    title: "输入错误",
+                                    content: "请选择出库人！",
+                                    type: 'red'
+                                });
+                                return false;
+                            } else if (i > wdata.i || i == 0) {
+                                $.alert({
+                                    title: "输入错误",
+                                    content: "出库数量不能大于库存也不能为零！",
+                                    type: 'red'
+                                });
+                                return false;
+                            } else {
+                                $.post(config.out, {
+                                        "wid": wid,
+                                        "wname": wname,
+                                        "model": model,
+                                        "factory": factory,
+                                        "i": i,
+                                        "unit": unit,
+                                        "u_pice": u_pice,
+                                        "user_admin": user_admin,
+                                        "user": user,
+                                        "date": date.toLocaleDateString(),
+                                    },
+                                    function(data) {
+                                        location.reload();
+                                    }, "json");
+                            }
+                        }
+                    },
+                    '取消': function() {}
+                }
+            });
+
+        }
+
+        function inp(wid) {
+            let wname;
+            let model;
+            let factory;
+            let i;
+            let unit;
+            let u_pice;
+            let date = new Date();
+            let wdata;
+            let ps;
+            let text_ps;
+            $.ajaxSettings.async = false;
+            $.post(config.warehouse_wid, {
+                    wid: wid
+                },
+                function(data) {
+                    wdata = data;
+                    wname = data.wname;
+                    model = data.model;
+                    factory = data.factory;
+                    unit = data.unit;
+                    u_pice = data.u_pice;
+                }, "json");
+            $.ajaxSettings.async = false;
+            $.post(config.user,
+                function(data) {
+                    let textt = "";
+                    for (let i = 0; i < data.length; i++) {
+                        textt += "<option>" + data[i].name + "-退回</option>";
+                    }
+                    text = textt;
+                    console.log(data);
+                }, "json");
+            if (wdata.model == null || wdata.model == '') wdata.model = '--';
+            if (wdata.factory == null || wdata.factory == '') wdata.factory = '--';
+            $.confirm({
+                title: '货号：' + wid + ' 的更改',
+                boxWidth: '700px',
+                useBootstrap: false,
+                //content: 'url:form.html',  // 也可以采用url形式
+                content: '<table style="width:100%">' +
+                    '<thead><tr><th>名称</th><th>型号</th><th>厂商</th><th>库存</th><th>单位</th><th>入库数量</th><th>入库备注</th></tr></thead>' +
+                    '<tbody><tr><td>' + wdata.wname + '</td><td>' + wdata.model + '</td><td>' + wdata.factory + '</td><td>' + wdata.i + '</td><td>' + wdata.unit + '</td><td>' +
+                    '<input id="out_i" type="number" placeholder="0" min="0" style="width:100px" class="form-control">' +
+                    '</td>' +
+                    '<td>' +
+                    '<select class="form-control selectpicker"  id="ps"><option>供货商入库</option>' +
+                    text +
+                    '</select>' +
+                    '</td>' +
+                    '</tr></tbody>' +
+                    '</table>',
+                buttons: {
+                    sayMyName: {
+                        text: '确定入库',
+                        btnClass: 'btn-orange',
+                        action: function() {
+                            i = $("#out_i").val();
+                            ps = $("#ps").find("option:selected").text();
+                            if (i <= 0) {
+                                $.alert({
+                                    title: "输入错误",
+                                    content: "入库量不能小于等于0！",
+                                    type: 'red'
+                                });
+                                return false;
+                            } else {
+                                $.post(config.in, {
+                                        wid: wid,
+                                        model: model,
+                                        factory: factory,
+                                        wname: wname,
+                                        i: i,
+                                        unit: unit,
+                                        u_pice: u_pice,
+                                        "date": date.toLocaleDateString(),
+                                        ps: ps,
+                                    },
+                                    function(data) {
+
+                                        location.reload();
+                                    }, "json");
+                            }
+                        }
+                    },
+                    '取消': function() {}
+                }
+            });
+        }
+
+        $("#button").click(function() {
+            let text = $("#text").val();
+            $.post(config.warehouse_post, {
+                    text: text
+                },
+                function(data) {
+                    datatable(data);
+                }, "json");
+        });
+        $(window).keydown(
+            function() {
+                if (event.keyCode == 13) {
+                    let text = $("#text").val();
+                    $.post(config.warehouse_post, {
+                            text: text
+                        },
+                        function(data) {
+                            datatable(data);
+                        }, "json");
+                }
+            });
+    </script>
+</body>
+
+</html>
