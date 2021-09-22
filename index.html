@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta name="author" content="yinq">
+    <title>维修部仓库管理系统</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="stylesheet" type="text/css" href="css/materialdesignicons.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="js/bootstrap-multitabs/multitabs.min.css">
+    <link rel="stylesheet" type="text/css" href="css/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.min.css">
+    <link href="./js/jquery-confirm/jquery-confirm.min.css" rel="stylesheet">
+    <script src="./js/config.js"></script>
+</head>
+
+<body>
+    <div id="body" class="lyear-layout-web" style="display: none;">
+        <div class="lyear-layout-container">
+            <!--左侧导航-->
+            <aside class="lyear-layout-sidebar">
+
+                <!-- logo -->
+                <div id="logo" class="sidebar-header">
+                    <a href="#"><img src="images/logo-title.png" title="LightYear" alt="LightYear" /></a>
+                </div>
+                <div class="lyear-layout-sidebar-info lyear-scroll">
+
+                    <nav class="sidebar-main">
+                        <ul class="nav-drawer">
+                            <li class="nav-item nav-item-has-subnav">
+                                <a href="javascript:void(0)"><i class="mdi mdi-home"></i> <span>仓库明细</span></a>
+                                <ul class="nav nav-subnav">
+                                    <li> <a class="multitabs" href="./html/warehouse_main.html">仓库现存</a> </li>
+                                    <li> <a class="multitabs" href="./html/warehouse_output.html">出库明细</a> </li>
+                                    <li> <a class="multitabs" href="./html/warehouse_input.html">入库明细</a> </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item nav-item-has-subnav">
+                                <a href="javascript:void(0)"><i class="mdi mdi-account-card-details-outline"></i> <span>仓库配置</span></a>
+                                <ul class="nav nav-subnav">
+                                    <li> <a class="multitabs" href="./html/config_cargo.html">仓库货物配置</a> </li>
+                                    <li> <a class="multitabs" href="./html/config_user.html">仓库人员配置</a> </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <div class="sidebar-footer">
+                        <p class="copyright">😊🔍This is a personal website and is not shared, please do not spread to each other.</p>
+                    </div>
+                </div>
+
+            </aside>
+            <!--End 左侧导航-->
+
+            <!--头部信息-->
+            <header class="lyear-layout-header">
+
+                <nav class="navbar">
+
+                    <div class="navbar-left">
+                        <div class="lyear-aside-toggler">
+                            <span class="lyear-toggler-bar"></span>
+                            <span class="lyear-toggler-bar"></span>
+                            <span class="lyear-toggler-bar"></span>
+                        </div>
+                    </div>
+
+
+                </nav>
+
+            </header>
+            <!--End 头部信息-->
+
+            <!--页面主要内容-->
+            <main class="lyear-layout-content">
+
+                <div id="iframe-content"></div>
+
+            </main>
+            <!--End 页面主要内容-->
+        </div>
+    </div>
+
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/perfect-scrollbar.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-multitabs/multitabs.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.min.js"></script>
+    <script type="text/javascript" src="js/index.min.js"></script>
+    <script type="text/javascript " src="./js/main.min.js "></script>
+    <script type="text/javascript" src="./js/jquery-confirm/jquery-confirm.min.js"></script>
+
+    <script>
+        window.onload = function() {
+            $.confirm({
+                title: '请先登录',
+                boxWidth: '400px',
+                useBootstrap: false,
+                //content: 'url:form.html',  // 也可以采用url形式
+                content: '<input autocomplete="off"  id="id" class="form-control" placeholder="输入账号..."> <br/>' +
+                    '<input autocomplete="off"  id="password" class="form-control" placeholder="输入密码...">',
+                buttons: {
+                    sayMyName: {
+                        text: '确定登录',
+                        btnClass: 'btn-orange',
+                        action: function() {
+                            let state;
+                            $.ajaxSettings.async = false;
+                            $.post(config.login, {
+                                    id: $("#id").val(),
+                                    password: $("#password").val()
+                                },
+                                function(data) {
+                                    state = data.state;
+                                }, "json");
+                            if (state == 500) {
+                                $("#body").css("display", "inline");
+                            } else {
+                                $.alert({
+                                    title: "账号密码错误",
+                                    content: "输入的账号密码有误请重新输入！",
+                                    type: 'red'
+                                });
+                                $("#id").val('');
+                                $("#password").val('');
+                                return false;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
