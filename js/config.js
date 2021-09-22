@@ -1,4 +1,4 @@
-var ip = "http://17438m795.51vip.biz";
+var ip = "http://17438m7w95.51vip.biz";
 var config = {
     login: ip + "/login",
     warehouse: ip + "/warehouse",
